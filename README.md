@@ -27,5 +27,5 @@ This repository includes a GitHub Actions workflow at `.github/workflows/deploy.
 ## Local Preview
 
 - `pnpm dev` previews the root `slides.md` entry.
-- `pnpm dev -- demo` previews `slides/demo/slides.md`.
-- `pnpm dev -- --demo` is also supported and maps to the same `demo` deck.
+- `pnpm dev demo` previews `slides/demo/slides.md`.
+- `pnpm dev --demo` is also supported and maps to the same `demo` deck.

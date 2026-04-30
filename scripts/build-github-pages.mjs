@@ -69,16 +69,6 @@ function extractTitle(entryPath, fallback) {
 
 function discoverSlides() {
   const discovered = []
-  const rootEntry = resolve(rootDir, 'slides.md')
-  if (existsSync(rootEntry)) {
-    discovered.push({
-      slug: 'academic',
-      entry: 'slides.md',
-      title: extractTitle(rootEntry, 'Academic'),
-      description: '根目录主演示文稿。',
-    })
-  }
-
   const slidesDir = resolve(rootDir, 'slides')
   if (!existsSync(slidesDir))
     return discovered
@@ -211,7 +201,7 @@ const siteBase = resolveSiteBasePath()
 const distDir = resolve(rootDir, 'dist')
 
 if (slides.length === 0) {
-  console.error('No Slidev decks found. Expected slides.md or slides/*/slides.md')
+  console.error('No Slidev decks found. Expected slides/*/slides.md')
   process.exit(1)
 }
 

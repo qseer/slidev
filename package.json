@@ -5,7 +5,7 @@
   "scripts": {
     "build": "slidev build",
     "build:github-pages": "node scripts/build-github-pages.mjs",
-    "dev": "slidev --open",
+    "dev": "node scripts/dev-slide.mjs",
     "export": "slidev export"
   },
   "dependencies": {

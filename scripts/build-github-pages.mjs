@@ -1,9 +1,7 @@
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
-
-import { slides } from './slides.config.mjs'
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 
@@ -48,6 +46,62 @@ function runCommand(args) {
     process.exit(result.status ?? 1)
 }
 
+function toTitleCase(input) {
+  return input
+    .split(/[-_]/g)
+    .filter(Boolean)
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ')
+}
+
+function extractTitle(entryPath, fallback) {
+  const source = readFileSync(entryPath, 'utf8')
+  const markdownTitle = source.match(/^#\s+(.+)$/m)
+  if (markdownTitle?.[1])
+    return markdownTitle[1].trim()
+
+  const frontmatterTitle = source.match(/^---[\s\S]*?\ntitle:\s*(.+)\n[\s\S]*?^---/m)
+  if (frontmatterTitle?.[1])
+    return frontmatterTitle[1].trim().replace(/^['"]|['"]$/g, '')
+
+  return fallback
+}
+
+function discoverSlides() {
+  const discovered = []
+  const rootEntry = resolve(rootDir, 'slides.md')
+  if (existsSync(rootEntry)) {
+    discovered.push({
+      slug: 'academic',
+      entry: 'slides.md',
+      title: extractTitle(rootEntry, 'Academic'),
+      description: '根目录主演示文稿。',
+    })
+  }
+
+  const slidesDir = resolve(rootDir, 'slides')
+  if (!existsSync(slidesDir))
+    return discovered
+
+  for (const dirent of readdirSync(slidesDir, { withFileTypes: true })) {
+    if (!dirent.isDirectory())
+      continue
+
+    const entryPath = resolve(slidesDir, dirent.name, 'slides.md')
+    if (!existsSync(entryPath))
+      continue
+
+    discovered.push({
+      slug: dirent.name,
+      entry: `slides/${dirent.name}/slides.md`,
+      title: extractTitle(entryPath, toTitleCase(dirent.name)),
+      description: `自动发现的演示文稿，目录来源于 slides/${dirent.name}/。`,
+    })
+  }
+
+  return discovered.sort((a, b) => a.slug.localeCompare(b.slug))
+}
+
 function buildDeck(siteBase, slide) {
   const entry = resolve(rootDir, slide.entry)
   const output = resolve(rootDir, 'dist', slide.slug)
@@ -57,7 +111,7 @@ function buildDeck(siteBase, slide) {
   runCommand(['exec', 'slidev', 'build', entry, '--base', base, '--out', output])
 }
 
-function renderIndex(siteBase) {
+function renderIndex(slides) {
   const links = slides.map(slide => `      <li><a href="./${slide.slug}/">${slide.title}</a><span>${slide.description}</span></li>`).join('\n')
 
   return `<!DOCTYPE html>
@@ -142,7 +196,7 @@ function renderIndex(siteBase) {
 <body>
   <main>
     <h1>Slidev Decks</h1>
-    <p>这个仓库当前已部署以下演示文稿。新增 slide 后，只需要在构建清单中注册即可自动发布。</p>
+    <p>这个仓库当前已部署以下演示文稿。新增 slide 后，只需要创建对应目录和 <code>slides.md</code>，下次构建时会自动发布。</p>
     <ul>
 ${links}
     </ul>
@@ -152,8 +206,14 @@ ${links}
 `
 }
 
+const slides = discoverSlides()
 const siteBase = resolveSiteBasePath()
 const distDir = resolve(rootDir, 'dist')
+
+if (slides.length === 0) {
+  console.error('No Slidev decks found. Expected slides.md or slides/*/slides.md')
+  process.exit(1)
+}
 
 rmSync(distDir, { recursive: true, force: true })
 mkdirSync(distDir, { recursive: true })
@@ -161,4 +221,4 @@ mkdirSync(distDir, { recursive: true })
 for (const slide of slides)
   buildDeck(siteBase, slide)
 
-writeFileSync(resolve(distDir, 'index.html'), renderIndex(siteBase))
+writeFileSync(resolve(distDir, 'index.html'), renderIndex(slides))

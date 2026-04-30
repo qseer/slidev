@@ -17,7 +17,8 @@ This repository includes a GitHub Actions workflow at `.github/workflows/deploy.
 - Opening a PR to `main` triggers a build check.
 - Merges pushed to `main` build and deploy automatically to GitHub Pages.
 - The workflow publishes the generated `dist/` directory to GitHub Pages.
-- Multiple Slidev decks are configured in `scripts/slides.config.mjs`.
+- The root `slides.md` is deployed as `/academic/`.
+- Any `slides/<name>/slides.md` file is discovered automatically and deployed as `/<name>/`.
 - Each deck is published to its own path, for example `/academic/` and `/demo/`.
 - The `dist/index.html` homepage is generated automatically and links to every deployed deck.
 - For project pages such as `https://<user>.github.io/<repo>/`, the workflow builds with the correct base path automatically.

@@ -9,3 +9,13 @@ To start the slide show:
 Edit the [slides.md](./slides.md) to see the changes.
 
 Learn more about Slidev at the [documentation](https://sli.dev/).
+
+## Deploy to GitHub Pages
+
+This repository includes a GitHub Actions workflow at `.github/workflows/deploy.yml`.
+
+- Opening a PR to `main` triggers a build check.
+- Merges pushed to `main` build and deploy automatically to GitHub Pages.
+- The workflow publishes the generated `dist/` directory to GitHub Pages.
+- For project pages such as `https://<user>.github.io/<repo>/`, the workflow builds with the correct base path automatically.
+- If you use a custom domain or want to override the path, set `SLIDEV_BASE_PATH` as a repository variable or secret, for example `/slides/`.

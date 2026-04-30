@@ -2,7 +2,7 @@
 theme: scholarly
 footerMiddle: Slidev 学术主题演示
 description: 面向学术工作者的演示幻灯片
-aspectRatio: 16/9
+aspectRatio: 4/3
 lang: zh
 themeConfig:
   colorMode: dark
@@ -97,11 +97,6 @@ subtitle: 常规内容展示
 | <kbd>←</kbd> / <kbd>Shift</kbd>+<kbd>空格</kbd> | 上一页/上一动画 |
 | <kbd>↑</kbd> | 上一张幻灯片 |
 | <kbd>↓</kbd> | 下一张幻灯片 |
-
----
-src: ./pages/imported-slides.md
-hide: false
----
 
 ---
 layout: center

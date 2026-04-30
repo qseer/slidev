@@ -21,8 +21,10 @@ This repository includes a GitHub Actions workflow at `.github/workflows/deploy.
 - Any `slides/<name>/slides.md` file is discovered automatically and deployed as `/<name>/`.
 - Each deck is published to its own path, for example `/academic/` and `/demo/`.
 - The `dist/index.html` homepage is generated automatically and links to every deployed deck.
+- The build also generates `dist/slides.json` for external consumers such as your blog.
 - For project pages such as `https://<user>.github.io/<repo>/`, the workflow builds with the correct base path automatically.
 - If you use a custom domain or want to override the path, set `SLIDEV_BASE_PATH` as a repository variable or secret, for example `/slides/`.
+- If you want `slides.json` to contain absolute URLs for a custom domain, set `SLIDEV_SITE_ORIGIN`, for example `https://slides.example.com`.
 
 ## Local Preview
 

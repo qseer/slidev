@@ -29,6 +29,19 @@ function resolveSiteBasePath() {
   return `/${repoName}/`
 }
 
+function resolveSiteOrigin() {
+  const explicit = process.env.SLIDEV_SITE_ORIGIN || process.env.SITE_ORIGIN
+  if (explicit)
+    return explicit.replace(/\/+$/g, '')
+
+  const repository = process.env.GITHUB_REPOSITORY
+  if (!repository)
+    return ''
+
+  const [owner] = repository.split('/')
+  return owner ? `https://${owner}.github.io` : ''
+}
+
 function runCommand(args) {
   const result = spawnSync(
     process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm',
@@ -99,6 +112,19 @@ function buildDeck(siteBase, slide) {
 
   mkdirSync(output, { recursive: true })
   runCommand(['exec', 'slidev', 'build', entry, '--base', base, '--out', output])
+}
+
+function buildManifest(slides, siteOrigin, siteBase) {
+  return slides.map(slide => {
+    const path = normalizeBasePath(`${siteBase}${slide.slug}`)
+    return {
+      slug: slide.slug,
+      title: slide.title,
+      description: slide.description,
+      path,
+      url: siteOrigin ? `${siteOrigin}${path}` : path,
+    }
+  })
 }
 
 function renderIndex(slides) {
@@ -197,6 +223,7 @@ ${links}
 }
 
 const slides = discoverSlides()
+const siteOrigin = resolveSiteOrigin()
 const siteBase = resolveSiteBasePath()
 const distDir = resolve(rootDir, 'dist')
 
@@ -212,3 +239,7 @@ for (const slide of slides)
   buildDeck(siteBase, slide)
 
 writeFileSync(resolve(distDir, 'index.html'), renderIndex(slides))
+writeFileSync(
+  resolve(distDir, 'slides.json'),
+  `${JSON.stringify(buildManifest(slides, siteOrigin, siteBase), null, 2)}\n`,
+)

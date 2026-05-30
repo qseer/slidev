@@ -46,6 +46,91 @@ layout: intro
 layout: section
 ---
 
+# 课前回顾
+
+## 上节课的两道记忆化搜索题
+
+---
+
+## 回顾 1：滑雪
+
+`n × m` 的二维高度图，每次只能滑到**严格更低**的相邻格子，求最长滑行路径长度。
+
+```cpp
+int dfs(int x, int y)
+{
+    if(memo[x][y]) return memo[x][y];          // 注意这一行
+    int res = 1;
+    for(int k = 0; k < 4; ++k)
+    {
+        int nx = x + dx[k], ny = y + dy[k];
+        if(nx < 1 || nx > n || ny < 1 || ny > m) continue;
+        if(h[nx][ny] < h[x][y])
+            res = max(res, dfs(nx, ny) + 1);
+    }
+    return memo[x][y] = res;
+}
+```
+
+> **提问**：为什么这里 `memo[x][y]` 不需要单独的 `vis` 数组判断"是否算过"？
+
+---
+layout: statement
+---
+
+# 答案
+
+因为路径长度**至少是 1**（站在原地就是 1）。
+
+`memo[x][y] == 0` 天然就表示"没算过"。
+
+<br/>
+
+→ 当**答案的值域**和"未算过的标记值"不冲突时，可以省掉 `vis`。
+
+（记住这一点 — 下午 T2 最大子段和会因为 `a[i]` 可负，**必须**用 `vis`。）
+
+---
+
+## 回顾 2：数塔
+
+从顶端 `(1,1)` 走到底层，每步只能往 **左下** 或 **右下**，求路径和的最大值。
+
+```cpp
+// dfs(i, j) = 从 (i, j) 走到底层的最大和
+int dfs(int i, int j)
+{
+    if(i == n) return a[n][j];
+    if(vis[i][j]) return memo[i][j];
+    vis[i][j] = true;
+    return memo[i][j] = a[i][j] + max(dfs(i+1, j), dfs(i+1, j+1));
+}
+// 答案 = dfs(1, 1)
+```
+
+> **提问**：状态能不能反过来定义成"从顶端走到 `(i, j)` 的最大和"？两种都能做出来吗？
+
+---
+layout: statement
+---
+
+# 答案
+
+**两种都行**，最终答案位置不同：
+
+- `dfs(i,j) = 从 (i,j) 到底` → 答案 = `dfs(1,1)`
+- `dfs(i,j) = 从 (1,1) 到 (i,j)` → 答案 = `max{ dfs(n, j) : 1 ≤ j ≤ n }`
+
+<br/>
+
+→ **状态可以从答案的不同侧切入。**
+
+（下午 T1 方格取数会再用一次这个思路 — 我们用的是"从 `(1,1)` 走到 `(i,j)`"的版本。）
+
+---
+layout: section
+---
+
 # 第一题：方格取数
 
 ## 热身 — 建立 DFS → memo → DP 流水线
